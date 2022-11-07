@@ -1,5 +1,5 @@
-﻿using Excercise_1.MVC.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+
 namespace Excercise_1.MVC.Controllers
 {
     public class GuessingGame : Controller

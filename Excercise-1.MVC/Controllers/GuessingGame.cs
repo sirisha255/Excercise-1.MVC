@@ -7,56 +7,50 @@ namespace Excercise_1.MVC.Controllers
 {
     public class GuessingGame : Controller
     {
-        [HttpPost]
-        public IActionResult GuessNumber(int guess)
-        {
-            if (!(string.IsNullOrEmpty(HttpContext.Session.GetString("intRnd"))))
-            {
-                int storedRnd = (int)HttpContext.Session.GetInt32("intRnd");
-                string response = Guess.GuessTheNumber(Convert.ToInt32(guess),storedRnd);
-
-                ViewBag.Number = response;
-
-            }
-            else
-            {
-                ViewBag.Number = "Enter a number between 1 and 100 and Submit";
-            }
-            return View();
-        }
-
-
+        Random randomNumber = new Random();
 
         [HttpGet]
         public IActionResult GuessNumber()
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("intRnd")))
+            string? RandomNumCookie = Request.Cookies["randomNumber"];
+            if (RandomNumCookie != null)
             {
-                int getRnd = Guess.RandomNumber();
-                HttpContext.Session.SetInt32("intRnd", getRnd);
-                ViewBag.Rnd = getRnd;
+                CookieOptions Option = new CookieOptions();
+                Option.Expires = DateTime.Now.AddMinutes(0);
+                randomNumber.Next(0, 100);
+                Response.Cookies.Append("randomNumber", "", Option);
+            }
+            return View();
+
+        }
+        [HttpPost]
+
+        public IActionResult GuessNumber(int guess)
+        {
+            string? RandomNumCookie = Request.Cookies["randomNumber"];
+            int Rnd;
+            if (RandomNumCookie == null)
+            {
+                CookieOptions Option = new CookieOptions();
+                Option.Expires = DateTime.Now.AddMinutes(10);
+                int num = randomNumber.Next(0, 100);
+                Response.Cookies.Append("randomNumber", num.ToString(), Option);
+                Rnd = num;
             }
             else
             {
-                ViewBag.Rnd = HttpContext.Session.GetInt32("intRnd");
+                Rnd = int.Parse(RandomNumCookie);
             }
+
+            ViewBag.Number = Models.Guess.GuessTheNumber(guess, Rnd);
             return View();
-        }
 
-
-
-        [HttpGet]
-        public IActionResult Reset()
-        {
-            int getRnd = Guess.RandomNumber();
-            HttpContext.Session.SetInt32("intRnd", getRnd);
-            ViewBag.Rnd = getRnd;
-            return RedirectToAction(nameof(GuessNumber));
         }
     }
 
 
-
 }
+
+
 
 
